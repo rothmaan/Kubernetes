@@ -1,0 +1,11 @@
+Master:
+  AdminPassword: admin
+  resources:
+    limits:
+      cpu: "5000m"
+      memory: "148Mi"
+  ServiceType: NodePort
+  NodePort: 32323
+Presistence:
+  storageClass: "managed-nfs-storage
+  size: 1Gi

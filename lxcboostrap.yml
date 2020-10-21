@@ -1,0 +1,49 @@
+#! /bin/bash
+#
+# bootstrablxc.bash
+# Copyright (C) 2020 rothman <rothman@rothman.local>
+#
+# Distributed under terms of the MIT license.
+#
+---
+- hosts: localhost
+  user: root
+  become: yes
+  tasks:
+  - name: Creating LXD container
+    config:
+      limits.cpu: "2"
+      limits.memory: 2GB
+      limits.memory.swap: "false"
+      boot.autostart: "false"
+      linux.kernel_modules: ip_tables,ip6_tables,netlink_diag,nf_nat,overlay,br_netfilter
+      raw.lxc: |
+        lxc.apparmor.profile=unconfined
+        lxc.mount.auto=proc:rw sys:rw cgroup:rw
+        lxc.cgroup.devices.allow=a
+        lxc.cap.drop=
+      security.nesting: "true"
+      security.privileged: "true"
+    description: "k8s clusters"
+    devices:
+      aadisable:
+        path: /sys/module/nf_conntrack/parameters/hashsize
+        source: /dev/null
+        type: disk
+      aadisable1:
+        path: /sys/module/apparmor/parameters/enabled
+        source: /dev/null
+        type: disk
+  tasks:
+  - name: Install Python Packages
+    apt: name=python state=present update_cache=yes
+  - name: Creating LXD container
+    shell: lxc launch ubuntu:18.04 {{ item }}
+    with_items:
+        - haproxy
+        - controller-0
+        - controller-1
+        - controller-2
+        - worker-0
+        - worker-1
+        - worker-2
